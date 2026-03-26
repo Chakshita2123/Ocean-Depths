@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deep Dive Protocol — Descend Into the Unknown</title>
+  <meta name="description" content="An immersive, cinematic scroll-based deep-sea diving experience. Descend through the ocean zones in this interactive HUD simulation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Montserrat:wght@400;500;600&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen">
+    <div class="loader-content">
+      <div class="loader-ring"></div>
+      <p class="loader-text">INITIALIZING DIVE SYSTEMS...</p>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- GLOBAL AMBIENT TEXT -->
+  <div id="ambient-text" aria-hidden="true"></div>
+
+  <!-- PARTICLE CANVAS (legacy — now handled by background.js) -->
+
+  <!-- PARALLAX LAYERS -->
+  <div id="parallax-container" aria-hidden="true">
+    <div class="parallax-layer" data-speed="0.02" id="parallax-deep"></div>
+    <div class="parallax-layer" data-speed="0.05" id="parallax-mid"></div>
+    <div class="parallax-layer" data-speed="0.1" id="parallax-front"></div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div id="app">
+    <!-- LEFT — VISUAL PANEL (70%) -->
+    <main id="visual-panel">
+
+      <!-- SECTION 1: MISSION START -->
+      <section class="dive-section" id="section-mission" data-depth="0" data-zone="mission">
+        <div class="section-inner">
+          <h1 class="hero-title glitch-text">Deep Dive Protocol</h1>
+          <p class="hero-sub">You are about to descend into the deepest parts of the ocean.<br/>Proceed with caution.</p>
+          <div class="system-log-box glass-panel">
+            <div class="log-header"><span class="dot green"></span> SYSTEM LOG</div>
+            <div class="log-lines">
+              <p class="log-line" data-delay="500">Mission log initiated...</p>
+              <p class="log-line" data-delay="1200">All systems operational.</p>
+              <p class="log-line" data-delay="1900">Awaiting pilot confirmation.</p>
+            </div>
+          </div>
+          <button id="btn-begin" class="cta-button">
+            <span>Begin Descent</span>
+            <svg class="arrow-down" viewBox="0 0 24 24" width="20" height="20"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- SECTION 2: SUNLIGHT ZONE -->
+      <section class="dive-section" id="section-sunlight" data-depth="120" data-zone="sunlight">
+        <div class="zone-bg" aria-hidden="true"></div>
+        <div class="section-inner">
+          <h2 class="zone-title">Sunlight Zone</h2>
+          <p class="zone-text">Sunlight penetrates these waters, supporting vibrant ecosystems filled with life.<br/>This is where the ocean feels alive.</p>
+          <div class="env-cards">
+            <div class="env-card glass-panel">
+              <span class="env-label">Visibility</span>
+              <span class="env-value">High</span>
+            </div>
+            <div class="env-card glass-panel">
+              <span class="env-label">Temperature</span>
+              <span class="env-value">Warm</span>
+            </div>
+            <div class="env-card glass-panel">
+              <span class="env-label">Life Density</span>
+              <span class="env-value glow-text">Extreme</span>
+            </div>
+          </div>
+          <div class="system-messages">
+            <p class="sys-msg" data-delay="300"><span class="dot green"></span> System Stable</p>
+            <p class="sys-msg" data-delay="800"><span class="dot green"></span> All vitals normal</p>
+            <p class="sys-msg" data-delay="1300"><span class="dot blue"></span> Exploration mode active</p>
+          </div>
+          <div class="fact-box glass-panel">
+            <span class="fact-icon">🧬</span>
+            <p>90% of marine life exists in this zone.</p>
+          </div>
+          <button class="interact-btn glass-panel">
+            <span class="scan-icon">◎</span> Scan Environment
+          </button>
+        </div>
+      </section>
+
+      <!-- SECTION 3: TWILIGHT ZONE -->
+      <section class="dive-section" id="section-twilight" data-depth="640" data-zone="twilight">
+        <div class="zone-bg" aria-hidden="true">
+          <div class="bio-dot bd-1"></div>
+          <div class="bio-dot bd-2"></div>
+          <div class="bio-dot bd-3"></div>
+          <div class="bio-dot bd-4"></div>
+          <div class="bio-dot bd-5"></div>
+          <div class="creature-sil"></div>
+        </div>
+        <div class="section-inner">
+          <h2 class="zone-title">Twilight Zone</h2>
+          <p class="zone-text">Light begins to disappear.<br/>Strange creatures adapt by creating their own glow.</p>
+          <div class="env-cards">
+            <div class="env-card glass-panel">
+              <span class="env-label">Visibility</span>
+              <span class="env-value warn-text">Medium</span>
+            </div>
+            <div class="env-card glass-panel">
+              <span class="env-label">Temperature</span>
+              <span class="env-value warn-text">Dropping</span>
+            </div>
+            <div class="env-card glass-panel">
+              <span class="env-label">Light</span>
+              <span class="env-value warn-text">Minimal</span>
+            </div>
+          </div>
+          <div class="system-messages">
+            <p class="sys-msg" data-delay="300"><span class="dot yellow"></span> Light levels dropping</p>
+            <p class="sys-msg" data-delay="900"><span class="dot yellow"></span> Unidentified movement detected</p>
+            <p class="sys-msg" data-delay="1500"><span class="dot orange"></span> Proceed with caution</p>
+          </div>
+          <div class="fact-box glass-panel">
+            <span class="fact-icon">💡</span>
+            <p>Bioluminescence is used for survival.</p>
+          </div>
+          <button class="interact-btn glass-panel">
+            <span class="scan-icon">◉</span> Analyze Organism
+          </button>
+        </div>
+      </section>
+
+      <!-- SECTION 4: MIDNIGHT ZONE -->
+      <section class="dive-section" id="section-midnight" data-depth="2400" data-zone="midnight">
+        <div class="zone-bg" aria-hidden="true">
+          <div class="glow-eye eye-pair-1"><span></span><span></span></div>
+          <div class="glow-eye eye-pair-2"><span></span><span></span></div>
+        </div>
+        <div class="section-inner">
+          <h2 class="zone-title danger-title">Midnight Zone</h2>
+          <p class="zone-text">No sunlight reaches here.<br/>Silence dominates.<br/>Only the strongest survive.</p>
+          <div class="env-cards">
+            <div class="env-card glass-panel danger-border">
+              <span class="env-label">Visibility</span>
+              <span class="env-value danger-text">Near Zero</span>
+            </div>
+            <div class="env-card glass-panel danger-border">
+              <span class="env-label">Temperature</span>
+              <span class="env-value danger-text">Freezing</span>
+            </div>
+            <div class="env-card glass-panel danger-border">
+              <span class="env-label">Pressure</span>
+              <span class="env-value danger-text">Extreme</span>
+            </div>
+          </div>
+          <div class="system-messages">
+            <p class="sys-msg" data-delay="300"><span class="dot red blink"></span> WARNING: Pressure exceeding safe limits</p>
+            <p class="sys-msg" data-delay="1000"><span class="dot red blink"></span> Signal weakening</p>
+            <p class="sys-msg" data-delay="1700"><span class="dot orange"></span> Manual control recommended</p>
+          </div>
+          <div class="warning-panel glass-panel danger-glow">
+            <p class="warning-line">⚠ SYSTEM FAILURE IMMINENT</p>
+            <p class="warning-line">⚠ STRUCTURAL DAMAGE DETECTED</p>
+            <p class="warning-line">⚠ ABORT MISSION</p>
+          </div>
+          <div class="mystery-moment">
+            <p class="mystery-text">...</p>
+            <p class="mystery-text">Did you see that?</p>
+          </div>
+          <button class="interact-btn glass-panel danger-border">
+            <span class="scan-icon">◎</span> Track Movement
+          </button>
+        </div>
+      </section>
+
+      <!-- SECTION 5: THE ABYSS -->
+      <section class="dive-section" id="section-abyss" data-depth="11000" data-zone="abyss">
+        <div class="zone-bg" aria-hidden="true">
+          <div class="leviathan"></div>
+        </div>
+        <div class="section-inner">
+          <h2 class="zone-title abyss-title">The Abyss</h2>
+          <p class="zone-text abyss-text">You have reached a place few have ever seen.<br/>A world beyond light, beyond understanding.</p>
+          <div class="env-cards">
+            <div class="env-card glass-panel abyss-border">
+              <span class="env-label">Visibility</span>
+              <span class="env-value danger-text">None</span>
+            </div>
+            <div class="env-card glass-panel abyss-border">
+              <span class="env-label">Temperature</span>
+              <span class="env-value danger-text">Near Freezing</span>
+            </div>
+            <div class="env-card glass-panel abyss-border">
+              <span class="env-label">Pressure</span>
+              <span class="env-value danger-text">Unimaginable</span>
+            </div>
+          </div>
+          <div class="system-messages abyss-messages">
+            <p class="sys-msg" data-delay="300"><span class="dot red blink"></span> CRITICAL ERROR</p>
+            <p class="sys-msg" data-delay="900"><span class="dot red blink"></span> Life support failing</p>
+            <p class="sys-msg" data-delay="1500"><span class="dot red blink"></span> Unknown signal detected</p>
+          </div>
+          <div class="final-message">
+            <p class="final-line">You were never meant to reach here.</p>
+          </div>
+          <div class="pre-ending">
+            <p class="pre-ending-line">We were not meant to explore this far.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENDING -->
+      <section class="dive-section" id="section-ending" data-depth="11000" data-zone="ending">
+        <div class="section-inner ending-inner">
+          <div id="ending-dark" class="ending-block">
+            <p class="ending-line glitch-text">SYSTEM CRITICAL</p>
+            <p class="ending-line">Oxygen Depleted</p>
+            <p class="ending-line fade-out-line">Connection Lost</p>
+          </div>
+          <div id="ending-mystery" class="ending-block">
+            <p class="ending-line mystery-glow">Signal Detected…</p>
+            <p class="ending-line mystery-glow">Unknown Lifeform Approaching</p>
+            <p class="ending-eye">👁️</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- RIGHT — HUD PANEL (30%) -->
+    <aside id="hud-panel">
+      <div class="hud-header glass-panel">
+        <div class="hud-logo">DDP</div>
+        <div class="hud-title">DEEP DIVE PROTOCOL</div>
+      </div>
+
+      <!-- Status -->
+      <div class="hud-block glass-panel" id="hud-status-block">
+        <div class="hud-label">STATUS</div>
+        <div class="hud-value" id="hud-status">Ready</div>
+      </div>
+
+      <!-- Depth Meter -->
+      <div class="hud-block glass-panel" id="hud-depth-block">
+        <div class="hud-label">DEPTH</div>
+        <div class="hud-value-large" id="hud-depth">0<span class="hud-unit">m</span></div>
+        <div class="depth-bar">
+          <div class="depth-bar-fill" id="depth-bar-fill"></div>
+          <div class="depth-markers">
+            <span data-d="0">0m</span>
+            <span data-d="200">200m</span>
+            <span data-d="1000">1000m</span>
+            <span data-d="2400">2400m</span>
+            <span data-d="11000">11000m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Oxygen -->
+      <div class="hud-block glass-panel" id="hud-oxygen-block">
+        <div class="hud-label">OXYGEN</div>
+        <div class="hud-value-large" id="hud-oxygen">100<span class="hud-unit">%</span></div>
+        <div class="oxygen-ring-container">
+          <svg class="oxygen-ring" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42" />
+            <circle class="ring-fill" id="oxygen-ring-fill" cx="50" cy="50" r="42" />
+          </svg>
+          <div class="oxygen-ring-label" id="oxygen-ring-label">O₂</div>
+        </div>
+      </div>
+
+      <!-- Pressure -->
+      <div class="hud-block glass-panel" id="hud-pressure-block">
+        <div class="hud-label">PRESSURE</div>
+        <div class="hud-value" id="hud-pressure">Normal</div>
+      </div>
+
+      <!-- System Messages -->
+      <div class="hud-block glass-panel" id="hud-messages-block">
+        <div class="hud-label">SYSTEM LOG</div>
+        <div class="hud-log" id="hud-log">
+          <p class="hud-log-line">Awaiting commands...</p>
+        </div>
+      </div>
+
+      <!-- Micro-story -->
+      <div class="hud-block glass-panel" id="hud-story-block">
+        <div class="hud-label">COMMS</div>
+        <div class="hud-story" id="hud-story"></div>
+      </div>
+
+      <!-- Interaction hint -->
+      <div class="hud-hint" id="hud-hint">
+        <p>Scroll to descend &nbsp;•&nbsp; Hover to scan &nbsp;•&nbsp; Click to interact</p>
+      </div>
+    </aside>
+  </div>
+
+  <div id="cinematic-overlay" aria-hidden="true"></div>
+  <script src="background.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
