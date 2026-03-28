@@ -283,7 +283,8 @@
   /* ═══════════════════════════════════════
      FLOATING PARTICLES SYSTEM
      ═══════════════════════════════════════ */
-  const MAX_PARTICLES = 150;
+  const isMobile = window.innerWidth < 768;
+  const MAX_PARTICLES = isMobile ? 60 : 150;
   const particles = [];
   class BGParticle {
     constructor() { this.reset(true); }

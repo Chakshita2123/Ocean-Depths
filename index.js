@@ -1,5 +1,4 @@
 /* ===== DEEP DIVE PROTOCOL — INTERACTIVE ENGINE ===== */
-
 (function () {
   'use strict';
 
@@ -228,6 +227,18 @@
       else warningBar.textContent = '⚠  WARNING: EXTREME PRESSURE';
     }
     if (scrollHint && progress > 0.95) scrollHint.style.opacity = '0';
+
+    if (progress > 0.9) {
+      triggerJumpscare();
+    }
+    if (zone.zone === "midnight" || zone.zone === "abyss") {
+      applyCameraShake();
+    }
+    if (oxygen < 30) {
+      document.body.classList.add("critical");
+    } else {
+      document.body.classList.remove("critical");
+    }
   }
 
   function updateHudBlockState(block, zone) {
@@ -575,3 +586,89 @@
     });
   }
 })();
+
+let jumpscareTriggered = false;
+
+function triggerJumpscare() {
+  if (jumpscareTriggered) return;
+  jumpscareTriggered = true;
+
+  const flash = document.createElement("div");
+  flash.style.position = "fixed";
+  flash.style.inset = "0";
+  flash.style.background = "rgba(255,255,255,0.08)";
+  flash.style.zIndex = "9999";
+  flash.style.pointerEvents = "none";
+  flash.style.animation = "flashAnim 0.4s ease";
+
+  document.body.appendChild(flash);
+
+  // 👁️ Eye element
+  const eye = document.createElement("div");
+  eye.innerHTML = "👁️";
+  eye.style.position = "fixed";
+  eye.style.top = "50%";
+  eye.style.left = "50%";
+  eye.style.transform = "translate(-50%, -50%) scale(0.5)";
+  eye.style.fontSize = "120px";
+  eye.style.opacity = "0";
+  eye.style.zIndex = "10000";
+  eye.style.transition = "all 0.3s ease";
+
+  document.body.appendChild(eye);
+
+  setTimeout(() => {
+    eye.style.opacity = "1";
+    eye.style.transform = "translate(-50%, -50%) scale(1)";
+  }, 50);
+
+  setTimeout(() => {
+    eye.style.opacity = "0";
+    flash.remove();
+    eye.remove();
+  }, 500);
+}
+
+function applyCameraShake() {
+  const app = document.getElementById("app");
+
+  const x = (Math.random() - 0.5) * 3;
+  const y = (Math.random() - 0.5) * 3;
+
+  app.style.transform = `translate(${x}px, ${y}px)`;
+
+  setTimeout(() => {
+    app.style.transform = "translate(0,0)";
+  }, 50);
+}
+document.querySelectorAll(".interact-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const pulse = document.createElement("div");
+
+    pulse.style.position = "fixed";
+    pulse.style.inset = "0";
+    pulse.style.border = "2px solid cyan";
+    pulse.style.borderRadius = "50%";
+    pulse.style.animation = "scan 1s ease-out";
+    pulse.style.zIndex = "9999";
+
+    document.body.appendChild(pulse);
+
+    setTimeout(() => pulse.remove(), 1000);
+  });
+});
+
+const isMobile = window.innerWidth < 768;
+
+if (isMobile) {
+  // reduce particles
+  MAX_PARTICLES = 60;
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const btn = document.activeElement;
+    if (btn && btn.classList.contains("interact-btn")) {
+      btn.click();
+    }
+  }
+});
