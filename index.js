@@ -202,7 +202,6 @@
     const depthNew = document.getElementById('hud-depth-new');
     const oxygenNew = document.getElementById('hud-oxygen-new');
     const oxygenBarNew = document.getElementById('oxygen-bar-new');
-    const rulerDot = document.getElementById('ruler-dot');
     const warningBar = document.getElementById('warning-bar');
     const scrollHint = document.getElementById('scroll-hint-text');
 
