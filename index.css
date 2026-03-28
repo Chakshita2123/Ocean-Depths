@@ -1784,7 +1784,8 @@ body.vignette::before {
 
 /* Depth ruler (right side) */
 #hud-depth-ruler {
-  position: fixed;
+  position: relative;
+  height: 100vh;
   right: 24px;
   top: 50%;
   transform: translateY(-50%);
@@ -1796,9 +1797,15 @@ body.vignette::before {
   pointer-events: none;
 }
 
+#ruler-dot {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .ruler-track {
   width: 2px;
-  height: 200px;
+  height: 300px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 2px;
   position: relative;

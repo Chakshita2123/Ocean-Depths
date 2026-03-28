@@ -220,7 +220,11 @@
       oxygenBarNew.style.width = `${oxygen}%`;
       oxygenBarNew.style.background = oxygen < 30 ? '#FF4D4D' : oxygen < 60 ? '#FFCA28' : '#00E5FF';
     }
-    if (rulerDot) rulerDot.style.top = `${(depth / 11000) * 100}%`;
+    const percent = Math.min(100, (depth / 11000) * 100);
+    if (rulerDot) {
+      rulerDot.style.top = percent + "%";
+      rulerDot.style.transition = 'top 0.6s ease';
+    }
     if (warningBar) {
       warningBar.classList.toggle('show', zone.zone === 'midnight' || zone.zone === 'abyss');
       if (zone.zone === 'abyss') warningBar.textContent = '⚠  CRITICAL — LIFE SUPPORT FAILING';
