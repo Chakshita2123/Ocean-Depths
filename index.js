@@ -220,11 +220,13 @@
       oxygenBarNew.style.width = `${oxygen}%`;
       oxygenBarNew.style.background = oxygen < 30 ? '#FF4D4D' : oxygen < 60 ? '#FFCA28' : '#00E5FF';
     }
-    const percent = Math.min(100, (depth / 11000) * 100);
-    if (rulerDot) {
-      rulerDot.style.top = percent + "%";
-      rulerDot.style.transition = 'top 0.6s ease';
+    const percent = Math.min(100, (progress) * 100);
+    const dot = document.getElementById('ruler-dot');
+    if (dot) {
+      dot.style.top = percent + "%";
+      dot.style.transition = 'top 0.4s ease';
     }
+
     if (warningBar) {
       warningBar.classList.toggle('show', zone.zone === 'midnight' || zone.zone === 'abyss');
       if (zone.zone === 'abyss') warningBar.textContent = '⚠  CRITICAL — LIFE SUPPORT FAILING';
