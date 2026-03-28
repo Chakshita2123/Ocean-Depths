@@ -80,9 +80,9 @@
   }
 
   // ===== PARTICLE ENGINE (now handled by background.js) =====
-  function resizeCanvas() {}
-  function initParticles() {}
-  function animateParticles() {}
+  function resizeCanvas() { }
+  function initParticles() { }
+  function animateParticles() { }
 
   // ===== SCROLL PROGRESS =====
   function getScrollProgress() {
@@ -196,6 +196,38 @@
 
     // Cinematic moment check
     checkCinematicMoment(progress);
+
+
+    // === CORNER HUD UPDATE ===
+    const statusNew = document.getElementById('hud-status-new');
+    const depthNew = document.getElementById('hud-depth-new');
+    const oxygenNew = document.getElementById('hud-oxygen-new');
+    const oxygenBarNew = document.getElementById('oxygen-bar-new');
+    const rulerDot = document.getElementById('ruler-dot');
+    const warningBar = document.getElementById('warning-bar');
+    const scrollHint = document.getElementById('scroll-hint-text');
+
+    if (statusNew) {
+      statusNew.textContent = zone.status;
+      statusNew.style.color = zone.zone === 'abyss' || zone.zone === 'ending' ? '#FF4D4D'
+        : zone.zone === 'midnight' ? '#FFCA28' : '#fff';
+    }
+    if (depthNew) depthNew.innerHTML = `${depth}<span class="hud-corner-unit">m</span>`;
+    if (oxygenNew) {
+      oxygenNew.innerHTML = `${oxygen}<span class="hud-corner-unit">%</span>`;
+      oxygenNew.style.color = oxygen < 30 ? '#FF4D4D' : oxygen < 60 ? '#FFCA28' : '#fff';
+    }
+    if (oxygenBarNew) {
+      oxygenBarNew.style.width = `${oxygen}%`;
+      oxygenBarNew.style.background = oxygen < 30 ? '#FF4D4D' : oxygen < 60 ? '#FFCA28' : '#00E5FF';
+    }
+    if (rulerDot) rulerDot.style.top = `${(depth / 11000) * 100}%`;
+    if (warningBar) {
+      warningBar.classList.toggle('show', zone.zone === 'midnight' || zone.zone === 'abyss');
+      if (zone.zone === 'abyss') warningBar.textContent = '⚠  CRITICAL — LIFE SUPPORT FAILING';
+      else warningBar.textContent = '⚠  WARNING: EXTREME PRESSURE';
+    }
+    if (scrollHint && progress > 0.95) scrollHint.style.opacity = '0';
   }
 
   function updateHudBlockState(block, zone) {
@@ -243,6 +275,23 @@
       els.ambientText.textContent = word;
     }
     els.ambientText.style.opacity = progress > 0.25 ? '1' : '0';
+  }
+
+  // Water movement on photo backgrounds
+  function updateWaterEffect() {
+    const now = Date.now();
+    const scrollY = window.scrollY;
+    const photoBgs = document.querySelectorAll('.zone-photo-bg');
+    photoBgs.forEach((bg, i) => {
+      const waveX = Math.sin(now * 0.0018 + i * 1.5) * 25;
+      const waveY = Math.cos(now * 0.0014 + i * 0.9) * 30 + scrollY * 0.07;
+      const brightness = 1 + Math.sin(now * 0.0025 + i) * 0.15;
+      const saturate = 1 + Math.cos(now * 0.002 + i) * 0.18;
+      const scale = 1.08 + Math.sin(now * 0.0016 + i) * 0.05;
+      bg.style.transform = `scale(${scale}) translate(${waveX}px, ${waveY}px)`;
+      bg.style.filter = `brightness(${brightness}) saturate(${saturate})`;
+      bg.style.transition = 'transform 0.1s ease-out, filter 0.1s ease-out';
+    });
   }
 
   // ===== PARALLAX =====
@@ -330,39 +379,81 @@
 
   // ===== INTERACT BUTTONS =====
   function initInteractButtons() {
-    const btns = $$('.interact-btn');
-    btns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const original = btn.innerHTML;
-        btn.innerHTML = '<span class="scan-icon">◉</span> Scanning...';
-        btn.disabled = true;
-        btn.style.borderColor = 'rgba(0,229,255,.6)';
-        btn.style.boxShadow = '0 0 30px rgba(0,229,255,.2)';
+    const SCAN_DATA = {
+      sunlight: {
+        scanning: '◉ Scanning...',
+        done: '✓ Scan Complete',
+        logs: [
+          '> Bio-scan initiated...',
+          '> 847 species detected in range.',
+          '> Coral reef at 18m depth.',
+          '> Water temp: 24°C — optimal.',
+          '> Life density: EXTREME ✓',
+        ],
+      },
+      twilight: {
+        scanning: '◉ Analyzing...',
+        done: '✓ Analysis Complete',
+        logs: [
+          '> Organism analysis started...',
+          '> Bioluminescent class: Dinoflagellate.',
+          '> Light output: 480nm wavelength.',
+          '> Threat level: NONE.',
+          '> Camouflage pattern logged.',
+        ],
+      },
+      midnight: {
+        scanning: '◉ Tracking...',
+        done: '⚠ Signal Lost',
+        logs: [
+          '> Motion tracking engaged...',
+          '> ⚠ Unidentified mass: 4.2m estimate.',
+          '> ⚠ Moving toward vessel.',
+          '> ⚠ Hull sensors triggered.',
+          '> ABORT TRACKING — signal corrupted.',
+        ],
+      },
+    };
 
-        const scanLine = document.createElement('p');
-        scanLine.className = 'hud-log-line';
-        scanLine.textContent = '> Environment scan initiated...';
-        els.hudLog.appendChild(scanLine);
-        els.hudLog.scrollTop = els.hudLog.scrollHeight;
+    const btns = document.querySelectorAll('.interact-btn');
+    const zoneMap = ['sunlight', 'twilight', 'midnight'];
+
+    btns.forEach((btn, i) => {
+      const zoneKey = zoneMap[i] || 'sunlight';
+      const data = SCAN_DATA[zoneKey];
+
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        const original = btn.innerHTML;
+        btn.innerHTML = `<span class="scan-icon">◉</span> ${data.scanning}`;
+        btn.disabled = true;
+
+        const hudLog = document.getElementById('hud-log');
+
+        data.logs.forEach((msg, idx) => {
+          setTimeout(() => {
+            const line = document.createElement('p');
+            line.className = 'hud-log-line';
+            line.textContent = msg;
+            if (msg.includes('⚠') || msg.includes('ABORT')) {
+              line.style.color = '#FF4D4D';
+            } else if (msg.includes('✓')) {
+              line.style.color = '#4CAF50';
+            }
+            hudLog.appendChild(line);
+            hudLog.scrollTop = hudLog.scrollHeight;
+          }, idx * 500);
+        });
 
         setTimeout(() => {
-          btn.innerHTML = '<span class="scan-icon">✓</span> Scan Complete';
-          btn.style.borderColor = 'rgba(76,175,80,.5)';
-          btn.style.boxShadow = '0 0 20px rgba(76,175,80,.15)';
-
-          const resultLine = document.createElement('p');
-          resultLine.className = 'hud-log-line';
-          resultLine.textContent = '> Scan complete. Data recorded.';
-          els.hudLog.appendChild(resultLine);
-          els.hudLog.scrollTop = els.hudLog.scrollHeight;
-
+          btn.innerHTML = `<span class="scan-icon">${data.done.includes('⚠') ? '⚠' : '✓'}</span> ${data.done}`;
+          btn.style.borderColor = data.done.includes('⚠') ? 'rgba(255,77,77,.5)' : 'rgba(76,175,80,.5)';
           setTimeout(() => {
             btn.innerHTML = original;
             btn.disabled = false;
             btn.style.borderColor = '';
-            btn.style.boxShadow = '';
-          }, 2000);
-        }, 1800);
+          }, 2500);
+        }, data.logs.length * 500 + 300);
       });
     });
   }
@@ -375,6 +466,7 @@
         const progress = getScrollProgress();
         updateHUD(progress);
         updateParallax();
+        updateWaterEffect();
         ticking = false;
       });
       ticking = true;
@@ -430,11 +522,56 @@
 
     // Initial HUD
     updateHUD(0);
+
+
+    // ===== WATER SOUND =====
+    const waterSound = document.getElementById('water-sound');
+    const soundToggle = document.getElementById('sound-toggle');
+    let soundOn = false;
+
+    if (soundToggle && waterSound) {
+      waterSound.volume = 0.6;
+      soundToggle.addEventListener('click', () => {
+        soundOn = !soundOn;
+        if (soundOn) {
+          waterSound.play().catch(() => { });
+          soundToggle.textContent = '🔊 SOUND';
+          soundToggle.style.background = 'rgba(0,229,255,0.2)';
+        } else {
+          waterSound.pause();
+          soundToggle.textContent = '🔇 SOUND';
+          soundToggle.style.background = 'rgba(0,229,255,0.1)';
+        }
+      });
+
+      // Auto volume fade based on depth
+      window.addEventListener('scroll', () => {
+        if (soundOn && waterSound) {
+          const p = getScrollProgress();
+          waterSound.volume = Math.max(0.05, 0.35 - p * 0.3);
+        }
+      });
+    }
+
+    function waterLoop() {
+      updateWaterEffect();
+      requestAnimationFrame(waterLoop);
+    }
+    waterLoop();
   }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+  // Mobile HUD toggle
+  const hudToggle = document.getElementById('hud-toggle');
+  const hudPanel = document.getElementById('hud-panel');
+  if (hudToggle && hudPanel) {
+    hudToggle.addEventListener('click', () => {
+      hudPanel.classList.toggle('open');
+      hudToggle.textContent = hudPanel.classList.contains('open') ? 'HUD ▼' : 'HUD ▲';
+    });
   }
 })();

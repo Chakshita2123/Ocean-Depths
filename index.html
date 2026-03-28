@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deep Dive Protocol — Descend Into the Unknown</title>
-  <meta name="description" content="An immersive, cinematic scroll-based deep-sea diving experience. Descend through the ocean zones in this interactive HUD simulation." />
+  <meta name="description"
+    content="An immersive, cinematic scroll-based deep-sea diving experience. Descend through the ocean zones in this interactive HUD simulation." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Montserrat:wght@400;500;600&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Montserrat:wght@400;500;600&family=Poppins:wght@600;700;800;900&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="index.css" />
 </head>
+
 <body>
+  <a href="#visual-panel" class="skip-link">Skip to content</a>
   <!-- LOADING SCREEN -->
   <div id="loading-screen">
     <div class="loader-content">
       <div class="loader-ring"></div>
       <p class="loader-text">INITIALIZING DIVE SYSTEMS...</p>
-      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+      <div class="loader-bar">
+        <div class="loader-bar-fill"></div>
+      </div>
     </div>
   </div>
 
@@ -34,14 +42,66 @@
 
   <!-- MAIN LAYOUT -->
   <div id="app">
+
+
+    <!-- CORNER HUD — TOP LEFT -->
+    <div class="corner-hud" id="hud-topleft">
+      <div class="hud-corner-card">
+        <div class="hud-corner-label">STATUS</div>
+        <div class="hud-corner-value" id="hud-status-new">Ready</div>
+        <div class="hud-corner-sub" id="hud-zone-name">Surface</div>
+      </div>
+      <div class="hud-corner-card" style="margin-top:10px">
+        <div class="hud-corner-label">DEPTH</div>
+        <div class="hud-corner-value" id="hud-depth-new">0<span class="hud-corner-unit">m</span></div>
+      </div>
+    </div>
+
+    <!-- CORNER HUD — TOP RIGHT -->
+    <div class="corner-hud" id="hud-topright">
+      <div class="hud-corner-card">
+        <div class="hud-corner-label">OXYGEN</div>
+        <div class="hud-corner-value" id="hud-oxygen-new">100<span class="hud-corner-unit">%</span></div>
+        <div class="oxygen-bar-wrap">
+          <div class="oxygen-bar-fill" id="oxygen-bar-new"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEPTH RULER — RIGHT SIDE -->
+    <div id="hud-depth-ruler">
+      <div style="position:relative">
+        <div class="ruler-labels">
+          <span class="ruler-label">0m</span>
+          <span class="ruler-label">200m</span>
+          <span class="ruler-label">1km</span>
+          <span class="ruler-label">2.4km</span>
+          <span class="ruler-label">11km</span>
+        </div>
+        <div class="ruler-track">
+          <div class="ruler-indicator" id="ruler-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM SCROLL HINT -->
+    <div class="corner-hud" id="hud-bottom">
+      <p class="scroll-hint" id="scroll-hint-text">Scroll to descend</p>
+    </div>
+
+    <!-- WARNING BAR -->
+    <div class="warning-bar" id="warning-bar">⚠ &nbsp; WARNING: EXTREME PRESSURE</div>
     <!-- LEFT — VISUAL PANEL (70%) -->
     <main id="visual-panel">
 
       <!-- SECTION 1: MISSION START -->
       <section class="dive-section" id="section-mission" data-depth="0" data-zone="mission">
+        <!-- section-mission ke andar, section-inner se PEHLE: -->
+        <div class="zone-photo-bg" aria-hidden="true"></div>
         <div class="section-inner">
           <h1 class="hero-title glitch-text">Deep Dive Protocol</h1>
-          <p class="hero-sub">You are about to descend into the deepest parts of the ocean.<br/>Proceed with caution.</p>
+          <p class="hero-sub">You are about to descend into the deepest parts of the ocean.<br />Proceed with caution.
+          </p>
           <div class="system-log-box glass-panel">
             <div class="log-header"><span class="dot green"></span> SYSTEM LOG</div>
             <div class="log-lines">
@@ -52,17 +112,21 @@
           </div>
           <button id="btn-begin" class="cta-button">
             <span>Begin Descent</span>
-            <svg class="arrow-down" viewBox="0 0 24 24" width="20" height="20"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <svg class="arrow-down" viewBox="0 0 24 24" width="20" height="20">
+              <path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" />
+            </svg>
           </button>
         </div>
       </section>
 
       <!-- SECTION 2: SUNLIGHT ZONE -->
       <section class="dive-section" id="section-sunlight" data-depth="120" data-zone="sunlight">
-        <div class="zone-bg" aria-hidden="true"></div>
+        <div class="zone-photo-bg" aria-hidden="true"></div>
         <div class="section-inner">
           <h2 class="zone-title">Sunlight Zone</h2>
-          <p class="zone-text">Sunlight penetrates these waters, supporting vibrant ecosystems filled with life.<br/>This is where the ocean feels alive.</p>
+          <p class="zone-text">Sunlight penetrates these waters, supporting vibrant ecosystems filled with
+            life.<br />This is where the ocean feels alive.</p>
           <div class="env-cards">
             <div class="env-card glass-panel">
               <span class="env-label">Visibility</span>
@@ -94,7 +158,7 @@
 
       <!-- SECTION 3: TWILIGHT ZONE -->
       <section class="dive-section" id="section-twilight" data-depth="640" data-zone="twilight">
-        <div class="zone-bg" aria-hidden="true">
+        <div class="zone-photo-bg" aria-hidden="true">
           <div class="bio-dot bd-1"></div>
           <div class="bio-dot bd-2"></div>
           <div class="bio-dot bd-3"></div>
@@ -104,7 +168,7 @@
         </div>
         <div class="section-inner">
           <h2 class="zone-title">Twilight Zone</h2>
-          <p class="zone-text">Light begins to disappear.<br/>Strange creatures adapt by creating their own glow.</p>
+          <p class="zone-text">Light begins to disappear.<br />Strange creatures adapt by creating their own glow.</p>
           <div class="env-cards">
             <div class="env-card glass-panel">
               <span class="env-label">Visibility</span>
@@ -136,13 +200,13 @@
 
       <!-- SECTION 4: MIDNIGHT ZONE -->
       <section class="dive-section" id="section-midnight" data-depth="2400" data-zone="midnight">
-        <div class="zone-bg" aria-hidden="true">
+        <div class="zone-photo-bg" aria-hidden="true">
           <div class="glow-eye eye-pair-1"><span></span><span></span></div>
           <div class="glow-eye eye-pair-2"><span></span><span></span></div>
         </div>
         <div class="section-inner">
           <h2 class="zone-title danger-title">Midnight Zone</h2>
-          <p class="zone-text">No sunlight reaches here.<br/>Silence dominates.<br/>Only the strongest survive.</p>
+          <p class="zone-text">No sunlight reaches here.<br />Silence dominates.<br />Only the strongest survive.</p>
           <div class="env-cards">
             <div class="env-card glass-panel danger-border">
               <span class="env-label">Visibility</span>
@@ -158,7 +222,8 @@
             </div>
           </div>
           <div class="system-messages">
-            <p class="sys-msg" data-delay="300"><span class="dot red blink"></span> WARNING: Pressure exceeding safe limits</p>
+            <p class="sys-msg" data-delay="300"><span class="dot red blink"></span> WARNING: Pressure exceeding safe
+              limits</p>
             <p class="sys-msg" data-delay="1000"><span class="dot red blink"></span> Signal weakening</p>
             <p class="sys-msg" data-delay="1700"><span class="dot orange"></span> Manual control recommended</p>
           </div>
@@ -179,12 +244,13 @@
 
       <!-- SECTION 5: THE ABYSS -->
       <section class="dive-section" id="section-abyss" data-depth="11000" data-zone="abyss">
-        <div class="zone-bg" aria-hidden="true">
+        <div class="zone-photo-bg" aria-hidden="true">
           <div class="leviathan"></div>
         </div>
         <div class="section-inner">
           <h2 class="zone-title abyss-title">The Abyss</h2>
-          <p class="zone-text abyss-text">You have reached a place few have ever seen.<br/>A world beyond light, beyond understanding.</p>
+          <p class="zone-text abyss-text">You have reached a place few have ever seen.<br />A world beyond light, beyond
+            understanding.</p>
           <div class="env-cards">
             <div class="env-card glass-panel abyss-border">
               <span class="env-label">Visibility</span>
@@ -302,5 +368,25 @@
   <div id="cinematic-overlay" aria-hidden="true"></div>
   <script src="background.js"></script>
   <script src="index.js"></script>
+
+  <button id="hud-toggle" aria-label="Toggle HUD Panel">HUD ▲</button>
+
+
+  <!-- WATER SOUND -->
+  <audio id="water-sound" loop crossorigin="anonymous">
+    <source src="https://assets.mixkit.co/active_storage/sfx/2929/2929-preview.mp3" type="audio/mpeg">
+    <source src="https://assets.mixkit.co/active_storage/sfx/1268/1268-preview.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- SOUND TOGGLE BUTTON -->
+  <button id="sound-toggle" aria-label="Toggle sound" style="
+  position:fixed;bottom:60px;right:16px;z-index:200;
+  background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);
+  color:#00E5FF;font-family:Montserrat,sans-serif;font-size:0.65rem;
+  letter-spacing:2px;padding:8px 12px;border-radius:8px;cursor:pointer;
+  backdrop-filter:blur(10px);pointer-events:all;
+">🔇 SOUND</button>
+
 </body>
+
 </html>

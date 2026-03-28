@@ -5,7 +5,7 @@
 
   const canvas = document.createElement('canvas');
   canvas.id = 'bg-canvas';
-  canvas.style.cssText = 'position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%';
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:-2;pointer-events:none;width:100%;height:100%';
   document.body.prepend(canvas);
   const ctx = canvas.getContext('2d');
 
@@ -19,25 +19,30 @@
 
   /* ───── COLOR PALETTE ───── */
   const COLORS = {
-    surface:   [110, 198, 255],
-    ocean:     [33, 150, 243],
-    deep:      [13, 71, 161],
-    midnight:  [2, 6, 23],
-    abyss:     [0, 0, 0],
-    glow:      [0, 229, 255],
-    danger:    [255, 77, 77],
+    surface: [110, 198, 255],
+    ocean: [33, 150, 243],
+    deep: [13, 71, 161],
+    midnight: [2, 6, 23],
+    abyss: [0, 0, 0],
+    glow: [0, 229, 255],
+    danger: [255, 77, 77],
   };
 
   /* ───── ZONE DEFINITIONS ───── */
   const ZONE_STOPS = [
-    { at: 0.00, bg1: [15, 50, 90],  bg2: [8, 30, 70]   },
-    { at: 0.10, bg1: [10, 60, 120], bg2: [5, 35, 85]    },
-    { at: 0.25, bg1: [5, 35, 90],   bg2: [3, 18, 60]    },
-    { at: 0.42, bg1: [3, 15, 50],   bg2: [2, 8, 30]     },
-    { at: 0.58, bg1: [2, 6, 23],    bg2: [1, 3, 10]     },
-    { at: 0.72, bg1: [1, 2, 6],     bg2: [0, 0, 2]      },
-    { at: 0.85, bg1: [0, 0, 2],     bg2: [0, 0, 0]      },
-    { at: 1.00, bg1: [0, 0, 0],     bg2: [0, 0, 0]      },
+    // SUNLIGHT ZONE — warm turquoise-green, surface glow
+    { at: 0.00, bg1: [20, 120, 140], bg2: [10, 80, 110] },
+    { at: 0.10, bg1: [15, 100, 130], bg2: [8, 65, 100] },
+    // SUNLIGHT → TWILIGHT transition — deeper blue-green
+    { at: 0.25, bg1: [8, 55, 100], bg2: [4, 30, 72] },
+    // TWILIGHT — dark blue
+    { at: 0.42, bg1: [3, 18, 55], bg2: [2, 10, 35] },
+    // MIDNIGHT — near black blue
+    { at: 0.58, bg1: [2, 7, 25], bg2: [1, 3, 12] },
+    { at: 0.72, bg1: [1, 2, 8], bg2: [0, 0, 3] },
+    // ABYSS — pure black
+    { at: 0.85, bg1: [0, 0, 3], bg2: [0, 0, 0] },
+    { at: 1.00, bg1: [0, 0, 0], bg2: [0, 0, 0] },
   ];
 
   /* ───── UTILITY ───── */
@@ -45,7 +50,7 @@
   function lerpColor(c1, c2, t) {
     return [lerp(c1[0], c2[0], t), lerp(c1[1], c2[1], t), lerp(c1[2], c2[2], t)];
   }
-  function rgb(c, a) { return a !== undefined ? `rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})` : `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`; }
+  function rgb(c, a) { return a !== undefined ? `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})` : `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   /* ───── GLOBAL BREATHING & CURRENT ───── */
@@ -82,7 +87,7 @@
   }
   resizeLayers();
   const origResize = resize;
-  resize = function() { origResize(); resizeLayers(); };
+  resize = function () { origResize(); resizeLayers(); };
 
   /* ───── FOREGROUND BUBBLES ───── */
   const NUM_BUBBLES = 40;
@@ -197,7 +202,7 @@
 
     for (const ray of rays) {
       const sway = Math.sin(time * ray.speed + ray.phase) * 0.06
-                 + Math.sin(time * ray.speed * 0.4 + ray.breathPhase) * 0.03;
+        + Math.sin(time * ray.speed * 0.4 + ray.breathPhase) * 0.03;
       const x = (ray.x + sway + getCurrentX(time) * 0.02) * W;
       const w = ray.width * (1 + Math.sin(time * ray.speed * 0.5 + ray.breathPhase) * 0.25);
       const a = ray.opacity * intensity * breathFactor;
@@ -206,9 +211,9 @@
       ctx.globalCompositeOperation = 'lighter';
       const glowW = w * 2.2;
       const gGrad = ctx.createLinearGradient(x, 0, x, H * 0.85);
-      gGrad.addColorStop(0, `rgba(110,198,255,${a * 0.5})`);
-      gGrad.addColorStop(0.3, `rgba(80,180,240,${a * 0.25})`);
-      gGrad.addColorStop(0.7, `rgba(33,150,243,${a * 0.08})`);
+      gGrad.addColorStop(0, `rgba(255,220,120,${a * 0.45})`);
+      gGrad.addColorStop(0.3, `rgba(180,230,255,${a * 0.22})`);
+      gGrad.addColorStop(0.7, `rgba(33,150,243,${a * 0.07})`);
       gGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = gGrad;
       ctx.beginPath();
@@ -222,9 +227,9 @@
 
       // PASS 2: Core ray (sharper, brighter)
       const grad = ctx.createLinearGradient(x, 0, x, H);
-      grad.addColorStop(0, `rgba(110,198,255,${a * 1.6})`);
-      grad.addColorStop(0.2, `rgba(110,198,255,${a * 1.2})`);
-      grad.addColorStop(0.5, `rgba(80,180,240,${a * 0.5})`);
+      grad.addColorStop(0, `rgba(255,225,130,${a * 1.5})`);
+      grad.addColorStop(0.2, `rgba(200,235,255,${a * 1.1})`);
+      grad.addColorStop(0.5, `rgba(80,180,240,${a * 0.45})`);
       grad.addColorStop(0.75, `rgba(33,150,243,${a * 0.15})`);
       grad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = grad;
@@ -258,11 +263,11 @@
     for (let col = -1; col < cols; col++) {
       for (let row = -1; row < rows; row++) {
         const cx = col * cellSize + driftX
-               + Math.sin(time * 0.00025 + row * 0.5 + col * 0.3) * 35
-               + Math.sin(time * 0.00015 + col * 0.7) * 12;
+          + Math.sin(time * 0.00025 + row * 0.5 + col * 0.3) * 35
+          + Math.sin(time * 0.00015 + col * 0.7) * 12;
         const cy = row * cellSize + driftY
-               + Math.cos(time * 0.0002 + col * 0.4 + row * 0.2) * 30
-               + Math.cos(time * 0.00012 + row * 0.6) * 10;
+          + Math.cos(time * 0.0002 + col * 0.4 + row * 0.2) * 30
+          + Math.cos(time * 0.00012 + row * 0.6) * 10;
         const r = cellSize * 0.4 + Math.sin(time * 0.0003 + col + row) * 18;
         const cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
         cGrad.addColorStop(0, 'rgba(110,198,255,0.5)');
@@ -307,8 +312,8 @@
     const breath = getBreath(time);
     // Layer speed multipliers: far = slow, near = fast
     const layerSpeeds = [0.4, 0.7, 1.0];
-    const layerSizes  = [0.6, 0.85, 1.0];
-    const layerAlphas  = [0.5, 0.75, 1.0];
+    const layerSizes = [0.6, 0.85, 1.0];
+    const layerAlphas = [0.5, 0.75, 1.0];
 
     for (let i = 0; i < MAX_PARTICLES; i++) {
       const pt = particles[i];
@@ -316,8 +321,8 @@
       // Multi-sine organic drift — each particle has unique feel
       pt.y -= pt.vy * ls;
       pt.x += (pt.vx + curX * 0.3 * ls) * ls
-           + Math.sin(time * pt.driftSpeed + pt.drift) * 0.05
-           + Math.sin(time * pt.driftSpeed * 0.6 + pt.drift2) * 0.03;
+        + Math.sin(time * pt.driftSpeed + pt.drift) * 0.05
+        + Math.sin(time * pt.driftSpeed * 0.6 + pt.drift2) * 0.03;
       pt.y += curY * 0.15 * ls;
       if (pt.y < -10) { pt.y = H + 10; pt.x = Math.random() * W; }
       if (pt.x < -10) pt.x = W + 10;
@@ -394,11 +399,11 @@
     for (const org of bioOrgs) {
       // Multi-frequency organic drift — never linear
       org.x += org.driftX + curX * 0.25
-            + Math.sin(time * org.speed + org.phase) * 0.35
-            + Math.sin(time * org.speed * 0.3 + org.pulsePhase) * 0.15;
+        + Math.sin(time * org.speed + org.phase) * 0.35
+        + Math.sin(time * org.speed * 0.3 + org.pulsePhase) * 0.15;
       org.y += org.driftY + curY * 0.15
-            + Math.cos(time * org.speed * 0.6 + org.phase) * 0.25
-            + Math.cos(time * org.speed * 0.2 + org.pulsePhase) * 0.1;
+        + Math.cos(time * org.speed * 0.6 + org.phase) * 0.25
+        + Math.cos(time * org.speed * 0.2 + org.pulsePhase) * 0.1;
       if (org.x < -80) org.x = W + 80;
       if (org.x > W + 80) org.x = -80;
       if (org.y < -80) org.y = H + 80;
@@ -471,7 +476,7 @@
 
       // Body undulation — sinusoidal vertical motion
       const bodyUndulate = Math.sin(time * 0.0005 + cr.phase) * 25
-                         + Math.sin(time * 0.0003 + cr.phase * 1.3) * 10;
+        + Math.sin(time * 0.0003 + cr.phase * 1.3) * 10;
       const yy = cr.y * H + bodyUndulate;
       const tw = Math.sin(time * 0.002 + cr.phase) * cr.tailWag;
 
@@ -875,8 +880,8 @@
       shadowEntity.x += shadowEntity.speed;
 
       const sy = shadowEntity.baseY * H
-               + Math.sin(time * 0.00015) * 40
-               + Math.sin(time * 0.00008) * 20; // slow undulation
+        + Math.sin(time * 0.00015) * 40
+        + Math.sin(time * 0.00008) * 20; // slow undulation
 
       const bLen = shadowEntity.bodyLen;
       const bH = shadowEntity.bodyH + Math.sin(time * 0.0001) * 12;
@@ -948,6 +953,220 @@
     ctx.restore();
   }
 
+
+  /* ═══════════════════════════════════════
+     LIVE FISH SYSTEM
+     ═══════════════════════════════════════ */
+
+  // Fish color schemes per zone
+  const FISH_ZONES = {
+    tropical: {
+      zStart: 0.00, zEnd: 0.30, fade: 0.06,
+      colors: [['#FF6B35', '#FFD700'], ['#00CED1', '#48D1CC'], ['#FF4500', '#FF6347'],
+      ['#7B68EE', '#00BFFF'], ['#32CD32', '#00FA9A'], ['#FF69B4', '#FF1493']]
+    },
+    deep: {
+      zStart: 0.22, zEnd: 0.58, fade: 0.06,
+      colors: [['rgba(0,229,255,0.85)', 'rgba(0,180,200,0.6)'],
+      ['rgba(140,80,255,0.8)', 'rgba(80,40,200,0.5)'],
+      ['rgba(80,200,255,0.8)', 'rgba(30,140,200,0.5)']]
+    },
+    ghost: {
+      zStart: 0.48, zEnd: 0.78, fade: 0.06,
+      colors: [['rgba(180,220,255,0.45)', 'rgba(120,160,200,0.25)'],
+      ['rgba(200,200,255,0.35)', 'rgba(140,140,220,0.2)']]
+    },
+    abyss: {
+      zStart: 0.72, zEnd: 1.00, fade: 0.06,
+      colors: [['rgba(80,0,0,0.55)', 'rgba(30,0,0,0.35)'],
+      ['rgba(0,40,40,0.5)', 'rgba(0,20,30,0.3)']]
+    },
+  };
+
+  function fishZoneAlpha(type, p) {
+    const z = FISH_ZONES[type];
+    if (p < z.zStart || p > z.zEnd) return 0;
+    const fadeIn = clamp((p - z.zStart) / z.fade, 0, 1);
+    const fadeOut = clamp((z.zEnd - p) / z.fade, 0, 1);
+    return Math.min(fadeIn, fadeOut);
+  }
+
+  class Fish {
+    constructor(type, idx) {
+      this.type = type;
+      const z = FISH_ZONES[type];
+      this.c1 = z.colors[idx % z.colors.length][0];
+      this.c2 = z.colors[idx % z.colors.length][1];
+
+      // Body size
+      const sizeMap = { tropical: [22, 10], deep: [32, 11], ghost: [38, 13], abyss: [42, 15] };
+      const [bwBase, bhBase] = sizeMap[type];
+      this.bw = bwBase + Math.random() * bwBase * 0.8;
+      this.bh = bhBase + Math.random() * bhBase * 0.7;
+
+      this.dir = Math.random() > 0.5 ? 1 : -1;
+      this.speed = 0.35 + Math.random() * 0.85;
+      if (type === 'ghost') this.speed *= 0.55;
+
+      this.phase = Math.random() * Math.PI * 2;
+      this.waveFreq = 0.0012 + Math.random() * 0.0018;
+      this.waveAmp = 15 + Math.random() * 22;
+      this.tailFreq = 0.0038 + Math.random() * 0.004;
+      this.tailPhase = Math.random() * Math.PI * 2;
+
+      this.hasLure = type === 'abyss' && Math.random() > 0.45;
+      this.lurePhase = Math.random() * Math.PI * 2;
+
+      this.reset(true);
+    }
+
+    reset(initial) {
+      this.baseY = 60 + Math.random() * (H - 120);
+      this.y = this.baseY;
+      if (initial) {
+        this.x = Math.random() * W;
+      } else {
+        this.x = this.dir > 0 ? -this.bw - 80 : W + this.bw + 80;
+        this.baseY = 60 + Math.random() * (H - 120);
+      }
+    }
+
+    update(time, cx, cy) {
+      this.x += this.speed * this.dir + cx * 0.25;
+      this.y = this.baseY
+        + Math.sin(time * this.waveFreq + this.phase) * this.waveAmp
+        + cy * 6;
+
+      const margin = this.bw + 120;
+      if (this.dir > 0 && this.x > W + margin) this.reset(false);
+      if (this.dir < 0 && this.x < -margin) this.reset(false);
+    }
+
+    draw(time, alpha) {
+      if (alpha <= 0.015) return;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      if (this.dir < 0) ctx.scale(-1, 1);
+      ctx.globalAlpha = alpha;
+
+      const tw = Math.sin(time * this.tailFreq + this.tailPhase) * this.bw * 0.26;
+
+      // Body
+      const bg2 = ctx.createLinearGradient(-this.bw * 0.4, -this.bh, -this.bw * 0.4, this.bh);
+      bg2.addColorStop(0, this.c1);
+      bg2.addColorStop(0.5, this.c2);
+      bg2.addColorStop(1, this.c1);
+      ctx.fillStyle = bg2;
+      ctx.beginPath();
+      ctx.ellipse(-this.bw * 0.05, 0, this.bw * 0.5, this.bh * 0.88, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Stripe (tropical only)
+      if (this.type === 'tropical') {
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.3;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.ellipse(-this.bw * 0.05, 0, this.bw * 0.16, this.bh * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Glow (deep / ghost)
+      if (this.type === 'deep' || this.type === 'ghost') {
+        ctx.save();
+        ctx.shadowBlur = 10 + Math.sin(time * 0.003 + this.phase) * 5;
+        ctx.shadowColor = this.c1;
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.fillStyle = this.c1;
+        ctx.beginPath();
+        ctx.ellipse(-this.bw * 0.05, 0, this.bw * 0.32, this.bh * 0.52, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Tail
+      ctx.globalAlpha = alpha * 0.82;
+      ctx.fillStyle = this.c1;
+      ctx.beginPath();
+      ctx.moveTo(this.bw * 0.40, 0);
+      ctx.quadraticCurveTo(this.bw * 0.58, tw * 0.55, this.bw * 0.80, -this.bh * 0.78 + tw);
+      ctx.quadraticCurveTo(this.bw * 0.58, tw * 0.28, this.bw * 0.80, this.bh * 0.78 + tw);
+      ctx.quadraticCurveTo(this.bw * 0.58, -tw * 0.38, this.bw * 0.40, 0);
+      ctx.fill();
+
+      // Dorsal fin
+      ctx.globalAlpha = alpha * 0.65;
+      ctx.fillStyle = this.c2;
+      ctx.beginPath();
+      ctx.moveTo(-this.bw * 0.18, -this.bh * 0.82);
+      ctx.quadraticCurveTo(this.bw * 0.06, -this.bh * 1.55 + Math.sin(time * 0.003 + this.phase) * 3, this.bw * 0.24, -this.bh * 0.82);
+      ctx.closePath();
+      ctx.fill();
+
+      // Pectoral fin
+      ctx.globalAlpha = alpha * 0.5;
+      ctx.beginPath();
+      ctx.ellipse(-this.bw * 0.04, this.bh * 0.38, this.bw * 0.16, this.bh * 0.32, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = this.type === 'abyss' ? 'rgba(255,60,60,0.95)' :
+        this.type === 'ghost' ? 'rgba(200,230,255,0.8)' : '#fff';
+      ctx.beginPath();
+      ctx.arc(-this.bw * 0.34, -this.bh * 0.14, this.bh * 0.27, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = this.type === 'abyss' ? 'rgba(200,0,0,0.9)' : 'rgba(0,0,0,0.88)';
+      ctx.beginPath();
+      ctx.arc(-this.bw * 0.34 + 0.5, -this.bh * 0.14, this.bh * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Anglerfish lure
+      if (this.hasLure) {
+        const lp = 0.5 + Math.sin(time * 0.0045 + this.lurePhase) * 0.5;
+        ctx.save();
+        ctx.globalAlpha = alpha * lp;
+        ctx.strokeStyle = 'rgba(0,220,255,0.5)';
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 12 + lp * 8;
+        ctx.shadowColor = 'rgba(0,229,255,0.9)';
+        ctx.beginPath();
+        ctx.moveTo(-this.bw * 0.28, -this.bh * 0.82);
+        ctx.quadraticCurveTo(-this.bw * 0.42, -this.bh * 1.45, -this.bw * 0.52, -this.bh * 1.82);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(0,229,255,0.95)';
+        ctx.beginPath();
+        ctx.arc(-this.bw * 0.52, -this.bh * 1.82, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+  }
+
+  // Spawn fish pools
+  const FISH_POOLS = {
+    tropical: Array.from({ length: 16 }, (_, i) => new Fish('tropical', i)),
+    deep: Array.from({ length: 10 }, (_, i) => new Fish('deep', i)),
+    ghost: Array.from({ length: 7 }, (_, i) => new Fish('ghost', i)),
+    abyss: Array.from({ length: 5 }, (_, i) => new Fish('abyss', i)),
+  };
+
+  function drawFish(p, time) {
+    const cx = getCurrentX(time);
+    const cy = getCurrentY(time);
+    for (const [type, pool] of Object.entries(FISH_POOLS)) {
+      const alpha = fishZoneAlpha(type, p);
+      if (alpha <= 0.015) continue;
+      for (const fish of pool) {
+        fish.update(time, cx, cy);
+        fish.draw(time, alpha);
+      }
+    }
+  }
+
   /* ═══════════════════════════════════════
      MAIN RENDER LOOP — 3-LAYER COMPOSITION
      Background (blurred, slowest) → Mid → Foreground (sharpest, fastest)
@@ -1016,6 +1235,7 @@
     ctx.translate(cam.x * FG_MUL, cam.y * FG_MUL);
     ctx.rotate(cam.rot * FG_MUL);
 
+    drawFish(p, time);
     drawBioOrganisms(p, time);
     drawParticles(p, time);
     drawBubbles(p, time);
