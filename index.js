@@ -223,8 +223,7 @@
     const percent = Math.min(100, (progress) * 100);
     const dot = document.getElementById('ruler-dot');
     if (dot) {
-      dot.style.top = percent + "%";
-      dot.style.transition = 'top 0.4s ease';
+      dot.style.top = `calc(${percent}% - 4px)`;
     }
 
     if (warningBar) {
